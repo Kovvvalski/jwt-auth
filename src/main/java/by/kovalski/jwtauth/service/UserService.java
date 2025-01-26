@@ -20,7 +20,7 @@ public class UserService {
 
 
     public User create(User user) {
-        if (repository.existsByUsername(user.getUsername())) {
+        if (repository.existsByLogin(user.getUsername())) {
             throw new RuntimeException("User with username " + user.getUsername() + " already exists");
         }
         return save(user);
