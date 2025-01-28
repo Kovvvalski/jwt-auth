@@ -38,7 +38,8 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   UserDataAuthorizationManager userDataAuthorizationManager) throws Exception {
         /////////////////////////////////////////////////////////////////////////////////////////////////////
 //        Customizer<CsrfConfigurer<HttpSecurity>> csrfCustomizer = new Customizer<>() {
 //            @Override
@@ -107,7 +108,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/test/**").permitAll()
-                .requestMatchers("/data_management/**").hasAnyRole("ADMIN", "USER")
+                .requestMatchers("/data_management/**").access(userDataAuthorizationManager)
                 .anyRequest().authenticated());
 
         http.sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS));

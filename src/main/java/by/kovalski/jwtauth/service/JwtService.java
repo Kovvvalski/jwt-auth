@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
@@ -20,6 +19,8 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
+    private static final String ID_CLAIM_NAME = "id";
+    private static final String ROLES_CLAIM_NAME = "role";
 
     @Value("${jwt.secret}")
     private String secret; // key in base64 format
@@ -32,15 +33,14 @@ public class JwtService {
     }
 
     public Long extractUserId(String token) {
-        //return extractClaim(token, )
-        return null;
+        return extractClaim(token, claims -> claims.get(ID_CLAIM_NAME, Long.class));
     }
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof User customUserDetails) {
-            claims.put("id", customUserDetails.getId());
-            claims.put("role", customUserDetails.getRole());
+            claims.put(ID_CLAIM_NAME, customUserDetails.getId());
+            claims.put(ROLES_CLAIM_NAME, customUserDetails.getRole());
         }
         return generateToken(claims, userDetails);
     }

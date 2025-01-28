@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserDataController {
     private final UserDataService dataService;
 
-    @RequestMapping(path = "/user_data/{id}", method = RequestMethod.GET)
-    public UserDataDto getUserData(@PathVariable Long id){
-        return dataService.getById(id);
+    @RequestMapping(path = "/user_data/{userDataId}", method = RequestMethod.GET)
+    public UserDataDto getUserData(@PathVariable Long userDataId){
+        return dataService.getById(userDataId);
     }
 }
