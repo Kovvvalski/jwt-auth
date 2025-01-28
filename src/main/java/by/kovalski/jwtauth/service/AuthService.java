@@ -21,7 +21,7 @@ public class AuthService {
 
     public AuthResponseDto signUp(AuthRequestDto authRequestDto) {
         User user = new User(null, authRequestDto.getLogin(),
-                passwordEncoder.encode(authRequestDto.getPassword()), Role.USER);
+                passwordEncoder.encode(authRequestDto.getPassword()), Role.ROLE_USER);
         userService.create(user);
         String token = jwtService.generateToken(user);
         return new AuthResponseDto(token);

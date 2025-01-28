@@ -12,7 +12,6 @@ public class JwtAuthApplication {
 
     public static void main(String[] args) {
         ApplicationContext context = SpringApplication.run(JwtAuthApplication.class, args);
-        System.out.println(context.getBean("springSecurityFilterChain").getClass());
     }
 
 }

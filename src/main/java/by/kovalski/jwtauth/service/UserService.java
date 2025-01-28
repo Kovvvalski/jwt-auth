@@ -2,11 +2,11 @@ package by.kovalski.jwtauth.service;
 
 import by.kovalski.jwtauth.entity.Role;
 import by.kovalski.jwtauth.entity.User;
+import by.kovalski.jwtauth.exception.ServiceException;
 import by.kovalski.jwtauth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,14 +21,14 @@ public class UserService {
 
     public User create(User user) {
         if (repository.existsByLogin(user.getUsername())) {
-            throw new RuntimeException("User with username " + user.getUsername() + " already exists");
+            throw new ServiceException("User with username " + user.getUsername() + " already exists");
         }
         return save(user);
     }
 
     public User getByUsername(String login) {
         return repository.findByLogin(login)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new ServiceException("User not found"));
 
     }
 
@@ -44,7 +44,7 @@ public class UserService {
     @Deprecated
     public void getAdmin() {
         var user = getCurrentUser();
-        user.setRole(Role.ADMIN);
+        user.setRole(Role.ROLE_ADMIN);
         save(user);
     }
 }

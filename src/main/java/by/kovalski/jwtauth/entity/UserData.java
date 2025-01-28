@@ -18,8 +18,8 @@ public class UserData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "profile_info", length = 500)
-    private String profileInfo;
+    @Column(name = "some_user_data", length = 500)
+    private String someUserData;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
