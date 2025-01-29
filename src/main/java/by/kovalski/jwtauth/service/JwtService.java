@@ -1,6 +1,7 @@
 package by.kovalski.jwtauth.service;
 
 import by.kovalski.jwtauth.entity.User;
+import by.kovalski.jwtauth.util.JwtClaims;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,9 +20,6 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    private static final String ID_CLAIM_NAME = "id";
-    private static final String ROLES_CLAIM_NAME = "role";
-
     @Value("${jwt.secret}")
     private String secret; // key in base64 format
 
@@ -33,14 +31,14 @@ public class JwtService {
     }
 
     public Long extractUserId(String token) {
-        return extractClaim(token, claims -> claims.get(ID_CLAIM_NAME, Long.class));
+        return extractClaim(token, claims -> claims.get(JwtClaims.USER_ID_CLAIM_NAME, Long.class));
     }
 
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof User customUserDetails) {
-            claims.put(ID_CLAIM_NAME, customUserDetails.getId());
-            claims.put(ROLES_CLAIM_NAME, customUserDetails.getRole());
+            claims.put(JwtClaims.USER_ID_CLAIM_NAME, customUserDetails.getId());
+            claims.put(JwtClaims.USER_ROLE_CLAIM_NAME, customUserDetails.getRole());
         }
         return generateToken(claims, userDetails);
     }

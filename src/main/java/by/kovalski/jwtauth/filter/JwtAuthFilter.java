@@ -3,6 +3,7 @@ package by.kovalski.jwtauth.filter;
 import by.kovalski.jwtauth.service.JwtService;
 import by.kovalski.jwtauth.service.UserService;
 import by.kovalski.jwtauth.util.HttpRequestUtils;
+import by.kovalski.jwtauth.util.RequestAttributes;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,17 +18,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.util.UrlPathHelper;
 
 import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
-    private static final String USER_ID_ATTRIBUTE = "user_id";
     private final JwtService jwtService;
     private final UserService userService;
-    private final UrlPathHelper urlPathHelper;
 
     @Override
     protected void doFilterInternal(
@@ -61,7 +59,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.setContext(context);
 
                 Long userId = jwtService.extractUserId(jwt);
-                request.setAttribute(USER_ID_ATTRIBUTE, userId);
+                request.setAttribute(RequestAttributes.USER_ID, userId);
             }
         }
         filterChain.doFilter(request, response);

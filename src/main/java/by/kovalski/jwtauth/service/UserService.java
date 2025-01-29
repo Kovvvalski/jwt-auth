@@ -18,6 +18,9 @@ public class UserService {
         return repository.save(user);
     }
 
+    public User getById(Long id) {
+        return repository.findById(id).orElseThrow(() -> new ServiceException("User with id " + id + " not found"));
+    }
 
     public User create(User user) {
         if (repository.existsByLogin(user.getUsername())) {
@@ -28,7 +31,7 @@ public class UserService {
 
     public User getByUsername(String login) {
         return repository.findByLogin(login)
-                .orElseThrow(() -> new ServiceException("User not found"));
+                .orElseThrow(() -> new ServiceException("User with login " + login + " does not exist"));
 
     }
 

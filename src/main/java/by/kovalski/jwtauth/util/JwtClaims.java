@@ -1,0 +1,6 @@
+package by.kovalski.jwtauth.util;
+
+public class JwtClaims {
+    public static final String USER_ID_CLAIM_NAME = "id";
+    public static final String USER_ROLE_CLAIM_NAME = "role";
+}

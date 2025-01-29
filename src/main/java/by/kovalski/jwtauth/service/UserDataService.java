@@ -1,10 +1,10 @@
 package by.kovalski.jwtauth.service;
 
 import by.kovalski.jwtauth.dto.UserDataDto;
-import by.kovalski.jwtauth.entity.User;
 import by.kovalski.jwtauth.entity.UserData;
 import by.kovalski.jwtauth.exception.ServiceException;
 import by.kovalski.jwtauth.repository.UserDataRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,25 +12,27 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDataService {
     private final UserDataRepository userDataRepository;
+    private final UserService userService;
 
     public UserDataDto getById(Long id) {
         return mapToDto(userDataRepository.findById(id).
                 orElseThrow(() -> new ServiceException("User data not found")));
     }
 
-    public UserDataDto create(UserDataDto userDataDto) {
+    @Transactional
+    public UserDataDto create(UserDataDto userDataDto, Long userId) {
         userDataDto.setId(null);
         UserData userData = mapToEntity(userDataDto);
+        userData.setUser(userService.getById(userId));
         return mapToDto(userDataRepository.save(userData));
     }
 
+    @Transactional
     public UserDataDto updateById(Long id, UserDataDto userDataDto) {
-        UserData userData = mapToEntity(userDataDto);
         UserData entityToUpdate = userDataRepository.findById(id).
                 orElseThrow(() -> new ServiceException("User data with id " + id + " not found"));
 
         entityToUpdate.setSomeUserData(userDataDto.getSomeUserData());
-        entityToUpdate.setUser(userData.getUser());
         return mapToDto(userDataRepository.save(entityToUpdate));
     }
 
@@ -47,7 +49,6 @@ public class UserDataService {
     }
 
     private UserData mapToEntity(UserDataDto userDataDto) {
-        return new UserData(userDataDto.getUserId(), userDataDto.getSomeUserData(),
-                new User(userDataDto.getUserId(), null, null, null));
+        return new UserData(userDataDto.getUserId(), userDataDto.getSomeUserData(), null);
     }
 }

@@ -21,7 +21,7 @@ public class UserData {
     @Column(name = "some_user_data", length = 500)
     private String someUserData;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }
