@@ -1,6 +1,5 @@
 package by.kovalski.jwtauth.config;
 
-import by.kovalski.jwtauth.entity.UserData;
 import by.kovalski.jwtauth.exception.ServiceException;
 import by.kovalski.jwtauth.service.JwtService;
 import by.kovalski.jwtauth.service.UserDataService;
@@ -16,8 +15,11 @@ import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 @Component
+// TODO take user id from request
 public class UserDataAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
     private static final String REQUEST_VAR_NAME = "userDataId";
+    private static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
+    private static final short RESOURCE_ID_QUERY_POSITION = 4;
 
     private final UserDataService userDataService;
     private final JwtService jwtService;
@@ -25,7 +27,7 @@ public class UserDataAuthorizationManager implements AuthorizationManager<Reques
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
         // Long userDataId = Long.parseLong(context.getVariables().get(REQUEST_VAR_NAME)); // not working :(
-        Long userDataId = Long.parseLong(context.getRequest().getRequestURI().split("/")[4]);
+        Long userDataId = Long.parseLong(context.getRequest().getRequestURI().split("/")[RESOURCE_ID_QUERY_POSITION]);
         String jwt = HttpRequestUtils.extractBearerToken(context.getRequest());
         Long userId = jwtService.extractUserId(jwt);
         boolean isGranted = false;
@@ -35,7 +37,7 @@ public class UserDataAuthorizationManager implements AuthorizationManager<Reques
                             .get()
                             .getAuthorities()
                             .stream()
-                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"))
+                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(ADMIN_ROLE_NAME))
             ) {
                 isGranted = true;
             }
