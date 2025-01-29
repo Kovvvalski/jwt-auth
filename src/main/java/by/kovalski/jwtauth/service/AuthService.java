@@ -2,6 +2,7 @@ package by.kovalski.jwtauth.service;
 
 import by.kovalski.jwtauth.dto.AuthRequestDto;
 import by.kovalski.jwtauth.dto.AuthResponseDto;
+import by.kovalski.jwtauth.dto.UserDto;
 import by.kovalski.jwtauth.entity.Role;
 import by.kovalski.jwtauth.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +21,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponseDto signUp(AuthRequestDto authRequestDto) {
-        User user = new User(null, authRequestDto.getLogin(),
+        UserDto userDto = new UserDto(null, authRequestDto.getLogin(),
                 passwordEncoder.encode(authRequestDto.getPassword()), Role.ROLE_USER);
-        userService.create(user);
+        User user = userService.mapToEntity(userService.create(userDto));
         String token = jwtService.generateToken(user);
         return new AuthResponseDto(token);
     }
@@ -34,7 +35,6 @@ public class AuthService {
         ));
 
         UserDetails user = userService.getByUsername(request.getLogin());
-
         String jwt = jwtService.generateToken(user);
         return new AuthResponseDto(jwt);
     }

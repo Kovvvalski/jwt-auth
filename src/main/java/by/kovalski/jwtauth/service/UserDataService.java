@@ -45,12 +45,12 @@ public class UserDataService {
         return toRemoveDto;
     }
 
-    private UserDataDto mapToDto(UserData userData) {
+    UserDataDto mapToDto(UserData userData) {
         return new UserDataDto(userData.getId(), userData.getSomeUserData(),
                 userData.getUser() == null ? null : userData.getUser().getId());
     }
 
-    private UserData mapToEntity(UserDataDto userDataDto) {
+    UserData mapToEntity(UserDataDto userDataDto) {
         return new UserData(userDataDto.getUserId(), userDataDto.getSomeUserData(), null);
     }
 }

@@ -1,5 +1,6 @@
 package by.kovalski.jwtauth.service;
 
+import by.kovalski.jwtauth.dto.UserDto;
 import by.kovalski.jwtauth.entity.Role;
 import by.kovalski.jwtauth.entity.User;
 import by.kovalski.jwtauth.exception.ServiceException;
@@ -12,25 +13,27 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-    private final UserRepository repository;
+    private final UserRepository userRepository;
 
     public User save(User user) {
-        return repository.save(user);
+        return userRepository.save(user);
     }
 
     public User getById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new ServiceException("User with id " + id + " not found"));
+        return userRepository.findById(id).orElseThrow(() -> new ServiceException("User with id " + id + " not found"));
     }
 
-    public User create(User user) {
-        if (repository.existsByLogin(user.getUsername())) {
-            throw new ServiceException("User with username " + user.getUsername() + " already exists");
+    public UserDto create(UserDto userDto) {
+        if (userRepository.existsByLogin(userDto.getLogin())) {
+            throw new ServiceException("User with username " + userDto.getLogin() + " already exists");
         }
-        return save(user);
+        userDto.setId(null);
+        User user = mapToEntity(userDto);
+        return mapToDto(userRepository.save(user));
     }
 
     public User getByUsername(String login) {
-        return repository.findByLogin(login)
+        return userRepository.findByLogin(login)
                 .orElseThrow(() -> new ServiceException("User with login " + login + " does not exist"));
 
     }
@@ -44,10 +47,11 @@ public class UserService {
         return getByUsername(username);
     }
 
-    @Deprecated
-    public void getAdmin() {
-        var user = getCurrentUser();
-        user.setRole(Role.ROLE_ADMIN);
-        save(user);
+    User mapToEntity(UserDto userDto) {
+        return new User(userDto.getId(), userDto.getLogin(), userDto.getPassword(), userDto.getRole());
+    }
+
+    UserDto mapToDto(User user) {
+        return new UserDto(user.getId(), user.getLogin(), user.getPassword(), user.getRole());
     }
 }
