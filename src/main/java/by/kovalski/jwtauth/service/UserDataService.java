@@ -36,6 +36,7 @@ public class UserDataService {
         return mapToDto(userDataRepository.save(entityToUpdate));
     }
 
+    @Transactional
     public UserDataDto deleteById(Long id) {
         if (userDataRepository.existsById(id)) {
             return mapToDto(userDataRepository.removeUserDataById(id));
