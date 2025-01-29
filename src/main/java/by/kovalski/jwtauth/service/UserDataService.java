@@ -38,10 +38,11 @@ public class UserDataService {
 
     @Transactional
     public UserDataDto deleteById(Long id) {
-        if (userDataRepository.existsById(id)) {
-            return mapToDto(userDataRepository.removeUserDataById(id));
-        }
-        throw new ServiceException("User data with id " + id + " not found");
+        UserData toRemove = userDataRepository.findById(id).
+                orElseThrow(() -> new ServiceException("User data with id " + id + " not found"));
+        UserDataDto toRemoveDto = mapToDto(toRemove);
+        userDataRepository.delete(toRemove);
+        return toRemoveDto;
     }
 
     private UserDataDto mapToDto(UserData userData) {
