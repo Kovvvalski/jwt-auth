@@ -4,6 +4,7 @@ import by.kovalski.jwtauth.dto.UserDataDto;
 import by.kovalski.jwtauth.entity.UserData;
 import by.kovalski.jwtauth.exception.ServiceException;
 import by.kovalski.jwtauth.repository.UserDataRepository;
+import by.kovalski.jwtauth.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,8 +13,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDataService {
     private final UserDataRepository userDataRepository;
-    private final UserService userService;
-
+    private final UserRepository userRepository;
     public UserDataDto getById(Long id) {
         return mapToDto(userDataRepository.findById(id).
                 orElseThrow(() -> new ServiceException("User data not found")));
@@ -23,7 +23,7 @@ public class UserDataService {
     public UserDataDto create(UserDataDto userDataDto, Long userId) {
         userDataDto.setId(null);
         UserData userData = mapToEntity(userDataDto);
-        userData.setUser(userService.getById(userId));
+        userData.setUser(userRepository.findById(userId).orElseThrow(() -> new ServiceException("User with id " + userId + " not found")));
         return mapToDto(userDataRepository.save(userData));
     }
 

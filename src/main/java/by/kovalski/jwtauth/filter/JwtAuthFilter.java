@@ -1,5 +1,6 @@
 package by.kovalski.jwtauth.filter;
 
+import by.kovalski.jwtauth.entity.Role;
 import by.kovalski.jwtauth.service.JwtService;
 import by.kovalski.jwtauth.service.UserService;
 import by.kovalski.jwtauth.util.HttpRequestUtils;
@@ -60,6 +61,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 Long userId = jwtService.extractUserId(jwt);
                 request.setAttribute(RequestAttributes.USER_ID, userId);
+                Role role = jwtService.extractRole(jwt);
+                request.setAttribute(RequestAttributes.USER_ROLE, role);
             }
         }
         filterChain.doFilter(request, response);

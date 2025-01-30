@@ -2,15 +2,13 @@ package by.kovalski.jwtauth.controller;
 
 import by.kovalski.jwtauth.dto.UserDataDto;
 import by.kovalski.jwtauth.service.UserDataService;
-import by.kovalski.jwtauth.util.RequestAttributes;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/data_management")
 @RequiredArgsConstructor
-public class UserDataController {
+public class UserDataManagementController {
     private final UserDataService dataService;
 
     @RequestMapping(path = "/user_data/{userDataId}", method = RequestMethod.GET)
@@ -24,8 +22,8 @@ public class UserDataController {
     }
 
     @RequestMapping(path = "/create_user_data", method = RequestMethod.POST)
-    public UserDataDto createUserData(@RequestBody UserDataDto userDataDto, HttpServletRequest request) {
-        return dataService.create(userDataDto, (Long) request.getAttribute(RequestAttributes.USER_ID));
+    public UserDataDto createUserData(@RequestBody UserDataDto userDataDto, @RequestAttribute Long userId) {
+        return dataService.create(userDataDto, userId);
     }
 
     @RequestMapping(path = "/user_data/{userDataId}", method = RequestMethod.PATCH)

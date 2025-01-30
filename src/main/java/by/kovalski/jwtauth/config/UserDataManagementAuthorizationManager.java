@@ -1,9 +1,10 @@
 package by.kovalski.jwtauth.config;
 
+import by.kovalski.jwtauth.entity.Role;
 import by.kovalski.jwtauth.exception.ServiceException;
-import by.kovalski.jwtauth.service.JwtService;
 import by.kovalski.jwtauth.service.UserDataService;
-import by.kovalski.jwtauth.util.HttpRequestUtils;
+import by.kovalski.jwtauth.util.RequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
@@ -15,30 +16,22 @@ import java.util.function.Supplier;
 
 @RequiredArgsConstructor
 @Component
-// TODO take user id from request
-public class UserDataAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
+public class UserDataManagementAuthorizationManager implements AuthorizationManager<RequestAuthorizationContext> {
     private static final String REQUEST_VAR_NAME = "userDataId";
-    private static final String ADMIN_ROLE_NAME = "ROLE_ADMIN";
     private static final short RESOURCE_ID_QUERY_POSITION = 4;
 
     private final UserDataService userDataService;
-    private final JwtService jwtService;
 
     @Override
     public AuthorizationDecision check(Supplier<Authentication> authentication, RequestAuthorizationContext context) {
         // Long userDataId = Long.parseLong(context.getVariables().get(REQUEST_VAR_NAME)); // not working :(
-        Long userDataId = Long.parseLong(context.getRequest().getRequestURI().split("/")[RESOURCE_ID_QUERY_POSITION]);
-        String jwt = HttpRequestUtils.extractBearerToken(context.getRequest());
-        Long userId = jwtService.extractUserId(jwt);
+        HttpServletRequest request = context.getRequest();
+        Long userDataId = Long.parseLong(request.getRequestURI().split("/")[RESOURCE_ID_QUERY_POSITION]);
+        Long userId = (Long) context.getRequest().getAttribute(RequestAttributes.USER_ID);
         boolean isGranted = false;
         try {
             if (userDataService.getById(userDataId).getUserId().equals(userId) ||
-                    authentication
-                            .get()
-                            .getAuthorities()
-                            .stream()
-                            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(ADMIN_ROLE_NAME))
-            ) {
+                    request.getAttribute(RequestAttributes.USER_ROLE).equals(Role.ROLE_ADMIN)) {
                 isGranted = true;
             }
         } catch (ServiceException e) { // user data is not found
