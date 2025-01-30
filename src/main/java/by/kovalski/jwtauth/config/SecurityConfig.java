@@ -51,7 +51,7 @@ public class SecurityConfig {
         }));
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/user_management").hasRole(ADMIN_ROLE_NAME)
+                .requestMatchers("/user_management/**").hasRole(ADMIN_ROLE_NAME)
                 .requestMatchers("/data_management/create_user_data").hasRole(USER_ROLE_NAME)
                 .requestMatchers("/data_management/user_data/*").access(userDataManagementAuthorizationManager)
                 .anyRequest().authenticated());
