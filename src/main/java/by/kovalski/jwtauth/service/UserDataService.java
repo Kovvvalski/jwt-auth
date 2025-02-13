@@ -4,7 +4,6 @@ import by.kovalski.jwtauth.dto.UserDataDto;
 import by.kovalski.jwtauth.entity.UserData;
 import by.kovalski.jwtauth.exception.ServiceException;
 import by.kovalski.jwtauth.repository.UserDataRepository;
-import by.kovalski.jwtauth.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,17 +12,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDataService {
     private final UserDataRepository userDataRepository;
-    private final UserRepository userRepository;
     public UserDataDto getById(Long id) {
         return mapToDto(userDataRepository.findById(id).
                 orElseThrow(() -> new ServiceException("User data not found")));
     }
 
     @Transactional
-    public UserDataDto create(UserDataDto userDataDto, Long userId) {
+    public UserDataDto create(UserDataDto userDataDto, String userId) {
         userDataDto.setId(null);
         UserData userData = mapToEntity(userDataDto);
-        userData.setUser(userRepository.findById(userId).orElseThrow(() -> new ServiceException("User with id " + userId + " not found")));
+        userData.setUserId(userId);
         return mapToDto(userDataRepository.save(userData));
     }
 
@@ -46,11 +44,10 @@ public class UserDataService {
     }
 
     UserDataDto mapToDto(UserData userData) {
-        return new UserDataDto(userData.getId(), userData.getSomeUserData(),
-                userData.getUser() == null ? null : userData.getUser().getId());
+        return new UserDataDto(userData.getId(), userData.getSomeUserData(), userData.getUserId());
     }
 
     UserData mapToEntity(UserDataDto userDataDto) {
-        return new UserData(userDataDto.getUserId(), userDataDto.getSomeUserData(), null);
+        return new UserData(userDataDto.getId(), userDataDto.getSomeUserData(), null);
     }
 }

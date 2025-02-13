@@ -21,7 +21,6 @@ public class UserData {
     @Column(name = "some_user_data", length = 500)
     private String someUserData;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @Column(name = "userId", nullable = false)
+    private String userId;
 }

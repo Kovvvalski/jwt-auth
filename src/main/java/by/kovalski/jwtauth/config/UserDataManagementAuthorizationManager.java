@@ -27,9 +27,11 @@ public class UserDataManagementAuthorizationManager implements AuthorizationMana
         // Long userDataId = Long.parseLong(context.getVariables().get(REQUEST_VAR_NAME)); // not working :(
         HttpServletRequest request = context.getRequest();
         Long userDataId = Long.parseLong(request.getRequestURI().split("/")[RESOURCE_ID_QUERY_POSITION]);
-        Long userId = (Long) context.getRequest().getAttribute(RequestAttributes.USER_ID);
+        Object userId = context.getRequest().getAttribute(RequestAttributes.USER_ID);
         boolean isGranted = false;
         try {
+
+            // TODO think about admin access
             if (userDataService.getById(userDataId).getUserId().equals(userId) ||
                     request.getAttribute(RequestAttributes.USER_ROLE).equals(Role.ROLE_ADMIN)) {
                 isGranted = true;

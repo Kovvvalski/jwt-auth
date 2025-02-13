@@ -22,7 +22,7 @@ public class UserDataManagementController {
     }
 
     @RequestMapping(path = "/create_user_data", method = RequestMethod.POST)
-    public UserDataDto createUserData(@RequestBody UserDataDto userDataDto, @RequestAttribute Long userId) {
+    public UserDataDto createUserData(@RequestBody UserDataDto userDataDto, @RequestAttribute String userId) {
         return dataService.create(userDataDto, userId);
     }
 

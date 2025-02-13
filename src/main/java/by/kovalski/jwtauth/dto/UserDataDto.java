@@ -9,5 +9,5 @@ import lombok.*;
 public class UserDataDto {
     private Long id;
     private String someUserData;
-    private Long userId;
+    private String userId;
 }

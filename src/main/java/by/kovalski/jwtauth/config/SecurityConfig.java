@@ -1,30 +1,24 @@
 package by.kovalski.jwtauth.config;
 
-import by.kovalski.jwtauth.filter.JwtAuthFilter;
-import by.kovalski.jwtauth.service.UserService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import by.kovalski.jwtauth.filter.Oauth2TokenUserIdResolverFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -34,10 +28,13 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
     private static final String ADMIN_ROLE_NAME = "ADMIN";
     private static final String USER_ROLE_NAME = "USER";
+    private static final String USER_NAME_CLAIM_NAME = "preferred_username";
+    private static final String ROLES_LIST = "spring_security_roles";
+    private static final String ROLE_PREFIX = "ROLE_";
+
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter,
-                                                   AuthenticationProvider authenticationProvider,
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, Oauth2TokenUserIdResolverFilter filter,
                                                    UserDataManagementAuthorizationManager userDataManagementAuthorizationManager) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable);
 
@@ -49,6 +46,9 @@ public class SecurityConfig {
             corsConfiguration.setAllowCredentials(true);
             return corsConfiguration;
         }));
+
+        http.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
         http.authorizeHttpRequests(request -> request
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/user_management/**").hasRole(ADMIN_ROLE_NAME)
@@ -57,28 +57,25 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         http.sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS));
-
-        http.authenticationProvider(authenticationProvider);
-        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+       // http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+        var converter = new JwtAuthenticationConverter();
+        var jwtAuthenticationConverter = new JwtGrantedAuthoritiesConverter();
+        converter.setPrincipalClaimName(USER_NAME_CLAIM_NAME);
+        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            Collection<GrantedAuthority> authorities = jwtAuthenticationConverter.convert(jwt);
+            List<String> roles = jwt.getClaimAsStringList(ROLES_LIST);
 
-    @Bean
-    public AuthenticationProvider authenticationProvider(UserService userService) {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userService.userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-            throws Exception {
-        return config.getAuthenticationManager();
+            return Stream.concat(authorities.stream(), roles.stream()
+                            .filter(role -> role.startsWith(ROLE_PREFIX))
+                            .map(SimpleGrantedAuthority::new)
+                            .map(GrantedAuthority.class::cast))
+                    .toList();
+        });
+        return converter;
     }
 }
