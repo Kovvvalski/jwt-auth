@@ -31,9 +31,9 @@ public class UserDataManagementAuthorizationManager implements AuthorizationMana
         boolean isGranted = false;
         try {
 
+            String userDataUserId = userDataService.getById(userDataId).getUserId();
             // TODO think about admin access
-            if (userDataService.getById(userDataId).getUserId().equals(userId) ||
-                    request.getAttribute(RequestAttributes.USER_ROLE).equals(Role.ROLE_ADMIN)) {
+            if (userDataService.getById(userDataId).getUserId().equals(userId)) {
                 isGranted = true;
             }
         } catch (ServiceException e) { // user data is not found

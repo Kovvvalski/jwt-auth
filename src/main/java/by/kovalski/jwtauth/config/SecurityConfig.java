@@ -12,6 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -57,7 +58,7 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
 
         http.sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS));
-       // http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(filter, BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 
